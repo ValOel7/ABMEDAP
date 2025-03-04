@@ -153,7 +153,7 @@ if st.button("Run Risk Analysis"):
 Scale-Free Network Investment and Portfolio Risk Analysis Spread Simulation
 
 This simulation models a market downturn in one sector and how an asset impacts another asset through correlation in a **scale-free network** using an agent-based approach. 
-Nodes represent different assets, where **red indicates that the asset has been affected by the market downturn, green represents the asset going back to equilibrium, and blue signifies that the asset Liquidated**. 
+Nodes represent different assets, where **red indicates that the asset has been affected by the market downturn, green represents the asset going back to equilibrium, and blue signifies that the asset is Liquidated**. 
 The market downturn follows a **proximity-based transmission**, with larger nodes taking longer to affect smaller ones. 
 After 5 time steps, an affected node **goes back to equilibrium (turns green) or Liquidates (turns blue) with a 50% probability**. 
 Users can adjust the number of agents, infection probability, and experiment duration.
