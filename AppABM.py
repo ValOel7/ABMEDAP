@@ -137,10 +137,7 @@ if st.button("Run Risk Analysis"):
     st.markdown("<script>window.scrollTo(0, document.body.scrollHeight);</script>", unsafe_allow_html=True)
     
     # Run the model with affected_correlation instead of random_correlation
-    model = RiskSpreadModel(
-        **{k: v for k, v in params.items() if k != "affected_correlation"}
-    )
-    
+    model = RiskSpreadModel(**params)   
     progress_bar = st.progress(0)
     visual_plot = st.empty()
     
