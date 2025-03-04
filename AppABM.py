@@ -4,7 +4,6 @@ import numpy as np
 import random
 import time
 import networkx as nx
-import random
 
 # Initialize simulation parameters
 def get_model_params():
@@ -35,9 +34,9 @@ class Agent:
             for neighbor in neighbors:
                 if neighbor.status == "susceptible assets":
                     susceptibility_factor = 1.0 / neighbor.size  # Smaller nodes are more susceptible assets
-                    random_correlation = affected_correlation * (random.uniform(-1, 1) / neighbor.size)
+                    correlation_factor = affected_correlation * (random.uniform(-1, 1) / neighbor.size)
                 
-                    if random_correlation > 0.5:  # Adjust threshold as needed
+                    if correlation_factor > 0.5:  # Adjust threshold as needed
                         neighbor.infection_timer = self.size  # Delay based on size
 
     def update_status(self):
@@ -55,7 +54,7 @@ class Agent:
 class RiskSpreadModel:
     def __init__(self, **params):
         self.num_agents = params["N"]
-        self.random_correlation = params["random_correlation"]
+        self.affected_correlation = params["affected_correlation"]  # Using affected_correlation from params
         self.G = nx.barabasi_albert_graph(self.num_agents, 3)
         self.agents = {}
         
@@ -80,7 +79,7 @@ class RiskSpreadModel:
         
         for node, agent in self.agents.items():
             neighbors = [self.agents[n] for n in self.G.neighbors(node)]
-            agent.interact(neighbors, self.random_correlation)
+            agent.interact(neighbors, self.affected_correlation)  # Use affected_correlation directly
         
         for agent in self.agents.values():
             prev_status = agent.status
@@ -124,7 +123,7 @@ def plot_visuals(G, agents, positions, infections, asset_back_equilibrium_counts
     # liquidated_asset time series plot
     axes[1, 1].plot(moving_average(liquidated_asset_counts), color="blue", linewidth=1.5)
     axes[1, 1].set_title("New liquidated_asset Per Step")
-    axes[1, 1].set_xlabel("Time (Seconds")
+    axes[1, 1].set_xlabel("Time (Seconds)")
     axes[1, 1].set_ylabel("liquidated_asset Count Per Step")
     
     plt.tight_layout()
@@ -136,10 +135,12 @@ params = get_model_params()
 
 if st.button("Run Risk Analysis"):
     st.markdown("<script>window.scrollTo(0, document.body.scrollHeight);</script>", unsafe_allow_html=True)
+    
+    # Run the model with affected_correlation instead of random_correlation
     model = RiskSpreadModel(
-    **{k: v for k, v in params.items() if k != "affected_correlation"},
-    random_correlation=random_correlation 
-)
+        **{k: v for k, v in params.items() if k != "affected_correlation"}
+    )
+    
     progress_bar = st.progress(0)
     visual_plot = st.empty()
     
@@ -151,21 +152,17 @@ if st.button("Run Risk Analysis"):
     
     st.write("Investment and Portfolio Risk Analysis Simulation Complete.")
 
-    st.markdown( """ Scale-Free Network Investment and Portfolio Risk Analysis Spread Simulation
+    st.markdown(""" 
+Scale-Free Network Investment and Portfolio Risk Analysis Spread Simulation
 
 This simulation models a market downturn in one sector and how an asset impacts another asset through correlation in a **scale-free network** using an agent-based approach. 
-Nodes represent different assets, where **red indicates that the asset has been affetced by the market downturn, green represents the asset going back to equilibrium, and blue signifies that the asset Liquidated**. 
+Nodes represent different assets, where **red indicates that the asset has been affected by the market downturn, green represents the asset going back to equilibrium, and blue signifies that the asset Liquidated**. 
 The market downturn follows a **proximity-based transmission**, with larger nodes taking longer to affect smaller ones. 
 After 5 time steps, an affected node **goes back to equilibrium (turns green) or Liquidates (turns blue) with a 50% probability**. 
 Users can adjust the number of agents, infection probability, and experiment duration.
 
 **Visualizations:**
-- A **real-time network graph** showing nodes changing color as a market turndown progresses.
+- A **real-time network graph** showing nodes changing color as a market downturn progresses.
 - **Three smoothed time series plots**:
   - Affected assets over time (**Red**).
-  - Number of assets reaching eqilibrium per step (**Green**).
-  - Number of liquidations per step (**Blue**).
-
-Adjust parameters and run the simulation to observe how a market downturn in one sector impacts correlated assets in a complex network.
-"""
-)
+  - Num
