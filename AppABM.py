@@ -165,4 +165,9 @@ Users can adjust the number of agents, infection probability, and experiment dur
 - A **real-time network graph** showing nodes changing color as a market downturn progresses.
 - **Three smoothed time series plots**:
   - Affected assets over time (**Red**).
-  - Num
+  - Number of assets reaching equilibrium per step (**Green**).
+  - Number of liquidations per step (**Blue**).
+
+Adjust parameters and run the simulation to observe how a market downturn in one sector impacts correlated assets in a complex network.
+"""
+)
