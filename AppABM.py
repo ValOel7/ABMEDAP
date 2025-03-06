@@ -8,9 +8,9 @@ import networkx as nx
 # Initialize simulation parameters
 def get_model_params():
     return {
-        "N": st.sidebar.slider("Number of agents", 50, 500, 100),
-        "initial_infected": st.sidebar.slider("Initial Number of Affected Assets", 1, 10, 3),
-        "infection_probability": st.sidebar.slider("Infection Probability", 0.0, 1.0, 0.5),
+        "N": st.sidebar.slider("Number of assets in your portfolio", 50, 500, 100),
+        "initial_affected": st.sidebar.slider("Number of assets affected by the market downturn", 1, 10, 3),
+        "asset_correlation": st.sidebar.slider("Correlation between the assets on average", 0.0, 1.0, 0.5),
         "steps": st.sidebar.slider("Experiment Duration (Seconds)", 5, 100, 50),  # Duration of the experiment
     }
 
@@ -26,21 +26,21 @@ class Agent:
         self.unique_id = unique_id
         self.status = status  # "affected assets", "susceptible", "asset back equilibrium", "asset liquidated"
         self.size = size  # Determines susceptibility
-        self.infection_timer = 0  # Timer for conversion delay
+        self.assetspreading_timer = 0  # Timer for conversion delay
         self.recovery_timer = 0  # Timer for turning green after infection
 
-    def interact(self, neighbors, infection_probability):
+    def interact(self, neighbors, asset_correlation):
         if self.status == "affected assets":
             for neighbor in neighbors:
                 if neighbor.status == "susceptible":
                     susceptibility_factor = 1.0 / neighbor.size  # Smaller nodes are more susceptible
-                    if random.random() < (infection_probability * susceptibility_factor):
-                        neighbor.infection_timer = self.size  # Delay based on size
+                    if random.random() < (asset_correlation * susceptibility_factor):
+                        neighbor.assetspreading_timer = self.size  # Delay based on size
 
     def update_status(self):
-        if self.status == "susceptible" and self.infection_timer > 0:
-            self.infection_timer -= 1
-            if self.infection_timer == 0:
+        if self.status == "susceptible" and self.assetspreading_timer > 0:
+            self.assetspreading_timer -= 1
+            if self.assetspreading_timer == 0:
                 self.status = "affected assets"
                 self.recovery_timer = 3  # Stay affected for 3 seconds before recovering
         elif self.status == "affected assets" and self.recovery_timer > 0:
@@ -48,20 +48,20 @@ class Agent:
             if self.recovery_timer == 0:
                 self.status = "asset back equilibrium" if random.random() > 0.5 else "asset liquidated"  # 50% chance to turn into asset back equilibrium or liquidated
 
-# Disease Spread Model
-class DiseaseSpreadModel:
+# Risk Spread Model
+class RiskSpreadModel:
     def __init__(self, **params):
         self.num_agents = params["N"]
-        self.infection_probability = params["infection_probability"]
+        self.asset_correlation = params["asset_correlation"]
         self.G = nx.barabasi_albert_graph(self.num_agents, 3)
         self.agents = {}
 
         all_nodes = list(self.G.nodes())
-        initial_infected = random.sample(all_nodes, params["initial_infected"])  # Select initial affected nodes
+        initial_affected = random.sample(all_nodes, params["initial_affected"])  # Select initial affected nodes
 
         for node in all_nodes:
             size = random.choice([1, 2, 3, 4])  # 1 (most susceptible) to 4 (least susceptible)
-            status = "affected assets" if node in initial_infected else "susceptible"
+            status = "affected assets" if node in initial_affected else "susceptible"
             self.agents[node] = Agent(node, status, size)
 
         self.node_positions = nx.spring_layout(self.G)  # Fix network shape
@@ -77,7 +77,7 @@ class DiseaseSpreadModel:
 
         for node, agent in self.agents.items():
             neighbors = [self.agents[n] for n in self.G.neighbors(node)]
-            agent.interact(neighbors, self.infection_probability)
+            agent.interact(neighbors, self.asset_correlation)
 
         for agent in self.agents.values():
             prev_status = agent.status
@@ -133,7 +133,7 @@ params = get_model_params()
 
 if st.button("Run Simulation"):
     st.markdown("<script>window.scrollTo(0, document.body.scrollHeight);</script>", unsafe_allow_html=True)
-    model = DiseaseSpreadModel(**params)
+    model = RiskSpreadModel(**params)
     progress_bar = st.progress(0)
     visual_plot = st.empty()
 
@@ -147,21 +147,12 @@ if st.button("Run Simulation"):
 
 st.markdown(
     """
-    **Scale-Free Network Disease Spread Simulation**
+    **Scale-Free Network Risk Spread Simulation between assets when there is a market downturn**
 
-    This simulation models disease spread in a **scale-free network** using an agent-based approach. 
-    Nodes represent individuals, where **red indicates infection, green represents recovery, and blue signifies death**. 
-    The spread follows **proximity-based transmission**, with larger nodes taking longer to infect smaller ones. 
-    After 3 time steps, an infected node **recovers (turns green) or dies (turns blue) with a 50% probability**. 
+    This simulation models risk spread between assets in a market downturn in a **scale-free network** using an agent-based approach. 
+    Nodes represent assets, where **red indicates that the asset is affected by the market downturn. Green represents that the asset is recovering meaning it tends back towards equilibrium. Blue signifies that the asset has liquidated.**. 
+    The spread follows **proximity-based transmission**, with larger assets taking longer to affect smaller assets. 
+    After 3 time steps, an affected asset **recovers (turns green) or when the asset liquidates (turns blue) with a 50% probability**. 
     Users can adjust the number of agents, infection probability, and experiment duration.
-
-    **Visualizations:**
-    - A **real-time network graph** showing nodes changing color as infection progresses.
-    - **Three smoothed time series plots**:
-      - Infection spread over time (**Red**).
-      - Number of recoveries per step (**Green**).
-      - Number of deaths per step (**Blue**).
-
-    Adjust parameters and run the simulation to observe how disease spreads in a complex network.
     """
 )
