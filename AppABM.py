@@ -150,7 +150,7 @@ st.markdown(
     **Scale-Free Network Risk Spread Simulation between assets when there is a market downturn**
 
     This simulation models risk spread between assets in a market downturn in a **scale-free network** using an agent-based approach. 
-    Nodes represent assets, where **red indicates that the asset is affected by the market downturn. Green represents that the asset is recovering meaning it tends back towards equilibrium. Blue signifies that the asset has liquidated.**. 
+    Nodes represent assets, where **red indicates that the asset is affected by the market downturn. Green represents that the asset is recovering meaning it tends back towards equilibrium. Blue signifies that the asset has liquidated.** 
     The spread follows **proximity-based transmission**, with larger assets taking longer to affect smaller assets. 
     After 3 time steps, an affected asset **recovers (turns green) or when the asset liquidates (turns blue) with a 50% probability**. 
     Users can adjust the number of agents, infection probability, and experiment duration.
