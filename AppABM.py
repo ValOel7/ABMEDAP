@@ -10,7 +10,7 @@ def get_model_params():
     return {
         "N": st.sidebar.slider("Number of assets in your portfolio", 50, 500, 100),
         "initial_affected": st.sidebar.slider("Number of assets affected by the market downturn", 1, 10, 3),
-        "asset_correlation": st.sidebar.slider("Correlation between the assets on average", 0.0, 1.0, 0.5),
+        "asset_correlation": st.sidebar.slider("Probability between the assets on average", 0.0, 1.0, 0.5),
         "steps": st.sidebar.slider("Experiment Duration (Seconds)", 5, 100, 50),  # Duration of the experiment
     }
 
